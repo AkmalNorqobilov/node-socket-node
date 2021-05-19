@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Socket.IO chat</title>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div id="app" class="h-screen flex items-center justify-center">
+        <div class="h-3/4 w-2/3 bg-red-300 rounded pb-24">
+            <h1 class="p-4 text-3xl font-bold text-white bg-gray-400">Wassup</h1>
+            <div id="body" class="bg-white h-full mx-4 py-4 px-10 w-auto space-y-4 overflow-y-scroll">
+                <div class="flex flex-col items-end" v-for="(data, index) in datas" :key="index">
+                    <h1 class="text-left bg-blue-100 py-0 px-4 rounded-3xl">{{data.user}}</h1>
+                    <h1 class="inline py-2 px-4 rounded-2xl text-white font-bold bg-green-500">{{data.message}}</h1>
+                </div>
+            </div>
+            <div>
+                <textarea v-model="text" type="text" @keyup.enter="yoz($event)" placeholder="Write a message ... "
+                    class="focus:outline-none w-full h-12 text-right pr-20 overscroll-none border-2 leading-normal pt-2 "></textarea>
+            </div>
+            {{listenMsg}}
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+    <!-- <script src="./public/index.js"></script> -->
+</body>
+
+</html>
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+
+    const app = new Vue({
+        el: '#app',
+        data: {
+            name: "",
+            datas: [],
+            text: "",
+            salom: "Hello world"
+        },
+        computed: {
+            listenMsg(){
+
+                socket.on('message', msg => {
+                    let dataNew = {...msg, text:'text-left'}
+                    this.datas.push(dataNew);
+
+                })
+            }
+        },
+        mounted() {
+            const socket = io();
+
+            do {
+                this.name = prompt('Please enter your name: ')
+            } while (!this.name);
+        },
+        methods: {
+            yoz(event) {
+                event.preventDefault();
+                if (this.text) {
+                    console.log(event);
+                    this.sendMessage(this.text);
+                    this.text = "";
+                }
+            },
+            sendMessage(msg) {
+                let msgs = {
+                    user: this.name,
+                    message: msg.trim()
+                };
+                this.datas.push(msgs);
+                socket.emit('message', {
+                    ...msgs
+                });
+
+
+            }
+        }
+    })
+</script>
+<script src="/index.js"></script>
